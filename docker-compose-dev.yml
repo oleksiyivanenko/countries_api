@@ -1,0 +1,5 @@
+web:
+  build: .
+  dockerfile: Dockerfile-dev
+  ports:
+   - "80:80"

@@ -84,8 +84,8 @@ func main() {
   }
 
   fmt.Printf("Serving\n")
-  http.HandleFunc("/api/v1/countries", allCountries)
-  http.HandleFunc("/api/v1/countries/", oneCountry)
+  http.HandleFunc("/v1/countries", allCountries)
+  http.HandleFunc("/v1/countries/", oneCountry)
   http.ListenAndServe(":8080", nil)
 }
 
@@ -95,7 +95,7 @@ func allCountries(w http.ResponseWriter, r *http.Request) {
 }
 
 func oneCountry(w http.ResponseWriter, r *http.Request) {
-  index := r.URL.Path[len("/api/v1/countries/"):]
+  index := r.URL.Path[len("/v1/countries/"):]
   index = strings.ToLower(index)
   w.Header().Set("Content-Type", "application/json")
 
