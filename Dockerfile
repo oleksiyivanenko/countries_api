@@ -3,11 +3,21 @@ FROM golang:1.6-alpine
 RUN apk add --update \
     nginx \
     supervisor \
+    py-sphinx \
+    py-pip \
+    py-docutils \
+    git \
   && rm -rf /var/cache/apk/*
 
-ADD . /go/src
-WORKDIR /go/src
+RUN pip install imagesize recommonmark
+RUN go get github.com/gorilla/mux
 
+ADD . /go/src
+
+WORKDIR /go/src/docs
+RUN make html
+
+WORKDIR /go/src
 RUN go build -o run
 
 RUN rm /etc/nginx/nginx.conf

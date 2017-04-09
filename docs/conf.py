@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Countries FYI'
-copyright = u'2017. A <a href="https://oleksiyivanenko.com">Oleksiy Ivanenko</a> Project'
+copyright = u'2017. Project by <a href="https://oleksiyivanenko.com">Oleksiy Ivanenko</a>'
 author = u'Oleksiy Ivanenko'
 
 # The version info for the project you're documenting, acts as replacement for
