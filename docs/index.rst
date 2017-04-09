@@ -4,15 +4,76 @@
    contain the root `toctree` directive.
 
 ==================
-Countries FYI API!
+Countries.FYI API!
 ==================
 
-Deadly simple API for getting info about countries.
+Deadly simple REST API for getting info about world countries.
 
-Methods
--------
+GET **v1/countries**
+====================
 
-GET ``v1/countries``
+Returns a list of [country_code, country_name] pairs. Designed to use for
+autocomplete calls.
+Returns a list of country objects if ``full`` flag was specified.
+
+URL
+---
+
+https://countries.fyi/v1/countries
+
+Paramenters
+-----------
+
++------+----------+------------------------------------------------------+
+| Name | Required | Description                                          |
++======+==========+======================================================+
+| full | optional | If specified list of country object will be returned |
++------+----------+------------------------------------------------------+
+
+Request example
+---------------
+
+GET https://countries.fyi/v1/countries
+
+Response example
+----------------
+
+.. code-block:: javascript
+
+   [
+     ["AW","Aruba"],
+     ["AF","Afghanistan"],
+     ["AO","Angola"],
+     // And so on
+   ]
+
+GET **v1/countries/:country_id**
+================================
+
+Returns an country object by its id.
+Two or three letters country code or country name can be used as country id.
+
+URL
+---
+
+https://countries.fyi/v1/countries/:country_id
+
+Errors
+------
+
+In case there was no country found **Not Found 404** will be returned.
+
+Request example
+---------------
+
+GET https://countries.fyi/v1/countries/ua  or
+
+GET https://countries.fyi/v1/countries/ukr or
+
+GET https://countries.fyi/v1/countries/ukraine
+
+Response example
+----------------
 
 .. code-block:: json
 
@@ -67,8 +128,7 @@ GET ``v1/countries``
      "area": 603500
    }
 
-Real method url https://countries.fyi/v1/countries
+Sources
+-------
 
-**GET** ``v1/countries/<country_code>``
-
-For example https://countries.fyi/v1/countries/ua
+Based on countries data from https://github.com/mledoze/countries
