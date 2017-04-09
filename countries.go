@@ -7,6 +7,8 @@ import (
   "encoding/json"
   "net/http"
   "io/ioutil"
+
+  "github.com/gorilla/mux"
 )
 
 type CountryName struct {
@@ -50,6 +52,7 @@ var (
 var cca2Countries map[string] []byte
 var cca3Countries map[string] []byte
 var nameCountries map[string] []byte
+var countriesShorltlist []byte
 
 
 func main() {
@@ -65,9 +68,9 @@ func main() {
 
   var countries []Country
 
-  err2 := json.Unmarshal(js, &countries)
-  if err2 != nil {
-    fmt.Println("error:", err2)
+  err = json.Unmarshal(js, &countries)
+  if err != nil {
+    fmt.Println("error:", err)
     os.Exit(1)
   }
 
@@ -75,35 +78,60 @@ func main() {
   cca3Countries = make(map[string] []byte)
   nameCountries = make(map[string] []byte)
 
+  var countries_short [][]string
+
   for k := range countries {
     marshaledCountry, _ := json.Marshal(countries[k])
 
     cca2Countries[strings.ToLower(countries[k].Cca2)] = marshaledCountry
     cca3Countries[strings.ToLower(countries[k].Cca3)] = marshaledCountry
     nameCountries[strings.ToLower(countries[k].Name.Common)] = marshaledCountry
+
+    countries_short = append(countries_short, []string{countries[k].Cca2, countries[k].Name.Common})
   }
 
-  fmt.Printf("Serving\n")
-  http.HandleFunc("/v1/countries", allCountries)
-  http.HandleFunc("/v1/countries/", oneCountry)
+  countriesShorltlist, err = json.Marshal(countries_short)
+
+  router := mux.NewRouter().StrictSlash(true)
+  router.HandleFunc("/v1/countries", allCountries)
+  router.HandleFunc("/v1/countries/{country_index}", oneCountry)
+
+  http.Handle("/", router)
   http.ListenAndServe(":8080", nil)
 }
 
 func allCountries(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
-  w.Write(js)
+
+  _, full := r.URL.Query()["full"]
+  if full {
+    w.Write(js)
+  } else {
+    w.Write(countriesShorltlist)
+  }
 }
 
 func oneCountry(w http.ResponseWriter, r *http.Request) {
-  index := r.URL.Path[len("/v1/countries/"):]
-  index = strings.ToLower(index)
+  vars := mux.Vars(r)
+  country_index := vars["country_index"]
+  country_index = strings.ToLower(country_index)
   w.Header().Set("Content-Type", "application/json")
 
-  if len(index) == 2 {
-    w.Write(cca2Countries[index])
-  } else if len(index) == 3 {
-    w.Write(cca3Countries[index])
+  var response []byte
+  var ok bool
+  if len(country_index) == 2 {
+    response, ok = cca2Countries[country_index]
+  } else if len(country_index) == 3 {
+    response, ok = cca3Countries[country_index]
   } else {
-    w.Write(nameCountries[index])
+    response, ok = nameCountries[country_index]
   }
+
+  if !ok {
+    w.WriteHeader(http.StatusNotFound)
+    w.Write([]byte("{\"error\": \"Not Found\"}"))
+    return
+  }
+
+  w.Write(response)
 }
